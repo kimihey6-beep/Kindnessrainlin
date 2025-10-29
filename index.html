@@ -189,4 +189,95 @@
       }
 
       /* ===== Util ===== */
-      funct
+      function nextMsg(){ const m = msgs[i % msgs.length]; i++; return m; }
+
+      // Track X yang terbaru untuk elak bertindan sisi-ke-sisi
+      const recentX = [];
+      function chooseCenteredX(rect){
+        const center = rect.left + rect.width/2;
+        const span = rect.width * 0.30;     // hanya ±15% kiri/kanan
+        let x;
+        let tries = 0;
+        do{
+          x = center + (Math.random()-0.5)*span;
+          tries++;
+        } while(recentX.some(px => Math.abs(px - x) < 140) && tries < 10);
+        // simpan & potong sejarah
+        recentX.push(x); if(recentX.length > 8) recentX.shift();
+        return x;
+      }
+
+      // Satu titisan — pusat & durasi panjang
+      function makeDrop(xPx = null){
+        const rect = sky.getBoundingClientRect();
+        const x = xPx === null ? chooseCenteredX(rect) : xPx;
+
+        const d = document.createElement('div');
+        d.className = 'drop';
+        d.style.setProperty('--dur', (16 + Math.random()*6) + 's');  // 16–22s
+        d.style.setProperty('--x', `${x - rect.left}px`);
+
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = '❤';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+
+        // taip perlahan & centered
+        const text = `♥ ${nextMsg()}`;
+        let p = 0;
+        const typer = setInterval(()=>{
+          bubble.textContent = text.slice(0, p++);
+          if(p > text.length) clearInterval(typer);
+        }, 28);
+
+        d.appendChild(heart);
+        d.appendChild(bubble);
+        sky.appendChild(d);
+
+        playPling();
+        d.addEventListener('animationend', () => d.remove());
+      }
+
+      /* ===== Hujan satu-satu & jarakkan masa ===== */
+      function startRain(){
+        if(raining) return;
+        raining = true;
+        startBtn.textContent = 'Raining…';
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+
+        if(!audioCtx){
+          try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+        }
+
+        // Selang lebih panjang: 1500–2200ms
+        const loop = () => {
+          if(!raining) return;
+          makeDrop();
+          timer = setTimeout(loop, 1500 + Math.random()*700);
+        };
+        loop();
+      }
+      function stopRain(){
+        raining = false;
+        startBtn.textContent = 'Start Rain';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        clearTimeout(timer);
+      }
+
+      function dropOne(){ makeDrop(); }
+
+      // Tap manual — masih ikut lokasi sentuhan
+      sky.addEventListener('pointerdown', (e)=> makeDrop(e.clientX));
+
+      startBtn.addEventListener('click', startRain);
+      stopBtn .addEventListener('click', stopRain);
+      oneBtn  .addEventListener('click', dropOne);
+
+      window.addEventListener('load', ()=> startBtn.focus(), {once:true});
+    </script>
+  </body>
+</html>
