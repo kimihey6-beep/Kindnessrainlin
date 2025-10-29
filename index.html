@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Kindness Rain for Fadhlin</title>
-    <!-- Fonts lembut -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +11,11 @@
       :root{
         --bg1:#fff7fb; --bg2:#ffe9f6;
         --card:#ffffff; --text:#161617; --muted:#6a6a6a;
-        --pink:#ff4fa0; --pink-soft:#ff86bf;
+
+        /* warna lalai (akan diubah ikut masa melalui JS) */
+        --heart:#ff4fa0;        /* warna hati */
+        --bubble:#ffffff;       /* latar bubble */
+        --bubble-b:#00000010;   /* border bubble */
       }
       *{box-sizing:border-box}
       html,body{height:100%;margin:0}
@@ -35,11 +38,11 @@
       .title{
         font-family:"Dancing Script", cursive; font-weight:700;
         font-size:clamp(26px,6.2vw,54px); line-height:1.1;
-        color:var(--pink); text-align:center; margin:2px 8px 2px;
-        text-shadow:0 0 18px rgba(255,79,160,.22);
+        color:var(--heart); text-align:center; margin:2px 8px 2px;
+        text-shadow:0 0 18px #00000022;
         animation:fadeDown .7s ease-out both;
       }
-      .sub{ text-align:center; font-weight:700; color:var(--pink-soft); margin:4px 0 10px }
+      .sub{ text-align:center; font-weight:700; color:#ff86bf; margin:4px 0 10px }
       @keyframes fadeDown{ from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)} }
 
       /* Kawasan hujan */
@@ -49,36 +52,38 @@
         overflow:hidden; margin:0 10px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
       }
 
-      /* Titisan hati */
+      /* Titisan hati + mesej */
       .drop{
-        position:absolute; top:-60px;
+        position:absolute; top:-80px;
         display:flex; align-items:center; gap:10px;
         transform:translateX(-50%);
-        animation:fall var(--dur,8s) linear forwards;
-        will-change:transform;
+        animation:fall var(--dur,12s) linear forwards;
+        will-change:transform,opacity;
       }
       .heart{
-        font-size:18px; line-height:1; color:var(--pink);
-        filter:drop-shadow(0 6px 12px rgba(255,79,160,.28));
+        font-size:20px; line-height:1; color:var(--heart);
+        filter:drop-shadow(0 6px 12px #00000028);
         animation:beat 1.8s ease-in-out infinite;
       }
       @keyframes beat{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
 
       .bubble{
         max-width:min(62vw, 520px);
-        background:rgba(255,255,255,.92);
-        border:1px solid rgba(0,0,0,.06);
+        background:var(--bubble);
+        border:1px solid var(--bubble-b);
         padding:10px 14px; border-radius:14px;
         box-shadow:0 10px 22px rgba(0,0,0,.08);
         font-size:14px; color:#383838;
+        white-space:nowrap;           /* biar satu baris panjang */
       }
-      .bubble b{ color:var(--pink) }
+      .bubble b{ color:var(--heart) }
 
+      /* Jatuh perlahan & hilang hampir bawah (98%) */
       @keyframes fall{
-        0%   { transform:translate(var(--x,0), -80px); opacity:0 }
-        8%   { opacity:1 }
-        92%  { opacity:1 }
-        100% { transform:translate(var(--x,0), calc(100% + 80px)); opacity:0 }
+        0%   { transform:translate(var(--x,0), -100px); opacity:0 }
+        10%  { opacity:1 }
+        98%  { opacity:1 }
+        100% { transform:translate(var(--x,0), calc(100% + 120px)); opacity:0 }
       }
 
       /* Kawalan */
@@ -116,16 +121,14 @@
         <h1 class="title">Kindness Rain for Fadhlin</h1>
         <p class="sub">Be happy</p>
 
-        <div class="sky" id="sky" aria-label="Hujan kebaikan">
-          <!-- titisan akan dijana melalui JS -->
-        </div>
+        <div class="sky" id="sky" aria-label="Hujan kebaikan"></div>
 
         <div class="controls">
           <button class="btn" id="start">Start Rain</button>
           <button class="btn secondary" id="stop" disabled>Stop</button>
           <button class="btn secondary" id="dropOne">Drop 1</button>
         </div>
-        <p class="hint">Petik butang <b>Start Rain</b> untuk hujan mesej manis; atau tekan <b>Drop 1</b> untuk satu titisan. Sentuh di mana-mana ruang untuk turunkan titisan di situ.</p>
+        <p class="hint">Tap <b>Start Rain</b> (bunyi aktif), atau <b>Drop 1</b> untuk satu titisan. Sentuh di langit untuk jatuhkan di lokasi sentuhan.</p>
         <div class="footer">for Fadhlin — “Some days are heavy; let the kindness do the lifting.”</div>
       </div>
     </div>
@@ -133,10 +136,38 @@
     <script>
       const sky = document.getElementById('sky');
       const startBtn = document.getElementById('start');
-      const stopBtn = document.getElementById('stop');
-      const oneBtn = document.getElementById('dropOne');
+      const stopBtn  = document.getElementById('stop');
+      const oneBtn   = document.getElementById('dropOne');
 
-      // Mesej manis (ringkas & lembut). Letakkan nama Fadhlin sekali-sekala.
+      /* ===== Tema warna ikut masa (Asia/Kuala_Lumpur) ===== */
+      function applyTimeTheme(){
+        const h = new Date().getHours(); // waktu lokal device
+        // pagi 5–11, siang 11–16, senja 16–19, malam 19–5
+        if (h >= 5 && h < 11) {
+          // pagi: pink lembut
+          document.documentElement.style.setProperty('--heart',    '#ff72b3');
+          document.documentElement.style.setProperty('--bubble',   '#ffffff');
+          document.documentElement.style.setProperty('--bubble-b', '#00000012');
+        } else if (h >= 11 && h < 16) {
+          // siang: pink terang
+          document.documentElement.style.setProperty('--heart',    '#ff3f96');
+          document.documentElement.style.setProperty('--bubble',   '#ffffff');
+          document.documentElement.style.setProperty('--bubble-b', '#00000014');
+        } else if (h >= 16 && h < 19) {
+          // senja: keunguan hangat
+          document.documentElement.style.setProperty('--heart',    '#d754ff');
+          document.documentElement.style.setProperty('--bubble',   '#fff7ff');
+          document.documentElement.style.setProperty('--bubble-b', '#7b3ad720');
+        } else {
+          // malam: fuchsia pekat + bubble kebiruan halus
+          document.documentElement.style.setProperty('--heart',    '#ff2d86');
+          document.documentElement.style.setProperty('--bubble',   '#f7f9ff');
+          document.documentElement.style.setProperty('--bubble-b', '#00104018');
+        }
+      }
+      applyTimeTheme();
+
+      /* ===== Mesej manis ===== */
       const msgs = [
         "Fadhlin, your heart is kind — that matters most.",
         "It’s okay to rest. You’re not falling behind.",
@@ -156,14 +187,33 @@
       ];
       let i = 0, timer=null, raining=false;
 
-      // Util: pick message
-      function nextMsg(){
-        const msg = msgs[i % msgs.length];
-        i++;
-        return msg;
+      /* ===== Bunyi “pling” (Web Audio — aktif selepas Start) ===== */
+      let audioCtx = null;
+      function playPling(){
+        if(!audioCtx) return; // belum Start
+        const ctx = audioCtx;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+
+        // nada lembut major triad (random pilih C5/E5/G5)
+        const freqs = [523.25, 659.25, 783.99];
+        o.frequency.value = freqs[Math.floor(Math.random()*freqs.length)];
+
+        o.type = 'sine';
+        const now = ctx.currentTime;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(0.12, now+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now+0.35 + Math.random()*0.1);
+
+        o.connect(g); g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now+0.5);
       }
 
-      // Buat satu titisan di posisi X rawak (atau ikut sentuhan)
+      /* ===== Util ===== */
+      function nextMsg(){ const m = msgs[i % msgs.length]; i++; return m; }
+
+      // Buat satu titisan — slow & jauh ke bawah
       function makeDrop(xPx = null){
         const rect = sky.getBoundingClientRect();
         const x = xPx === null
@@ -172,8 +222,9 @@
 
         const d = document.createElement('div');
         d.className = 'drop';
+        // durasi lebih perlahan (10–14s)
+        d.style.setProperty('--dur', (10 + Math.random()*4) + 's');
         d.style.setProperty('--x', `${x - rect.left}px`);
-        d.style.setProperty('--dur', (7 + Math.random()*4) + 's');
 
         const heart = document.createElement('div');
         heart.className = 'heart';
@@ -181,17 +232,26 @@
 
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
-        bubble.innerHTML = `<b>♥</b> ${nextMsg()}`;
+
+        // Taip huruf satu-satu (perlahan)
+        const text = `♥ ${nextMsg()}`;
+        let p = 0;
+        const typer = setInterval(()=>{
+          bubble.textContent = text.slice(0, p++);
+          if(p > text.length) clearInterval(typer);
+        }, 28); // kelajuan menaip
 
         d.appendChild(heart);
         d.appendChild(bubble);
         sky.appendChild(d);
 
-        // auto remove selepas animasi
+        playPling();
+
+        // auto remove selepas animasi tamat (turun sampai bawah)
         d.addEventListener('animationend', () => d.remove());
       }
 
-      // Auto hujan
+      /* ===== Hujan satu-satu & perlahan ===== */
       function startRain(){
         if(raining) return;
         raining = true;
@@ -199,13 +259,17 @@
         startBtn.disabled = true;
         stopBtn.disabled = false;
 
-        // spawn loop
+        // Sediakan audio context lepas user gesture
+        if(!audioCtx){
+          try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+          catch(e){ /* ignore */ }
+        }
+
+        // Loop: 1 titisan sahaja setiap 700–1100ms (still “one by one”)
         const loop = () => {
           if(!raining) return;
-          // 1–2 titisan setiap 300–650ms
-          const n = Math.random() < 0.6 ? 1 : 2;
-          for(let k=0;k<n;k++) makeDrop();
-          timer = setTimeout(loop, 300 + Math.random()*350);
+          makeDrop();
+          timer = setTimeout(loop, 700 + Math.random()*400);
         };
         loop();
       }
@@ -217,20 +281,17 @@
         clearTimeout(timer);
       }
 
-      // Satu titisan
+      // Satu titisan manual
       function dropOne(){ makeDrop(); }
 
       // Tap di langit untuk jatuhkan di lokasi sentuhan
-      sky.addEventListener('pointerdown', (e)=>{
-        const x = e.clientX;
-        makeDrop(x);
-      });
+      sky.addEventListener('pointerdown', (e)=> makeDrop(e.clientX));
 
       startBtn.addEventListener('click', startRain);
-      stopBtn.addEventListener('click', stopRain);
-      oneBtn.addEventListener('click', dropOne);
+      stopBtn .addEventListener('click', stopRain);
+      oneBtn  .addEventListener('click', dropOne);
 
-      // Mesra mobile: fokus Start supaya mudah tekan
+      // Mesra mobile: fokus Start
       window.addEventListener('load', ()=> startBtn.focus(), {once:true});
     </script>
   </body>
