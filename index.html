@@ -11,11 +11,9 @@
       :root{
         --bg1:#fff7fb; --bg2:#ffe9f6;
         --card:#ffffff; --text:#161617; --muted:#6a6a6a;
-
-        /* warna lalai (akan diubah ikut masa melalui JS) */
-        --heart:#ff4fa0;        /* warna hati */
-        --bubble:#ffffff;       /* latar bubble */
-        --bubble-b:#00000010;   /* border bubble */
+        --heart:#ff4fa0;        /* ikut masa melalui JS jika mahu */
+        --bubble:#ffffff;
+        --bubble-b:#00000010;
       }
       *{box-sizing:border-box}
       html,body{height:100%;margin:0}
@@ -34,7 +32,6 @@
         padding:22px 14px 18px; overflow:hidden;
       }
 
-      /* Tajuk */
       .title{
         font-family:"Dancing Script", cursive; font-weight:700;
         font-size:clamp(26px,6.2vw,54px); line-height:1.1;
@@ -45,48 +42,48 @@
       .sub{ text-align:center; font-weight:700; color:#ff86bf; margin:4px 0 10px }
       @keyframes fadeDown{ from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)} }
 
-      /* Kawasan hujan */
       .sky{
         position:relative; height:min(62vh, 560px);
         border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
         overflow:hidden; margin:0 10px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
       }
 
-      /* Titisan hati + mesej */
+      /* TITISAN — sekarang column & center */
       .drop{
-        position:absolute; top:-80px;
-        display:flex; align-items:center; gap:10px;
+        position:absolute; top:-100px;
+        display:flex; flex-direction:column; align-items:center; gap:8px;
         transform:translateX(-50%);
-        animation:fall var(--dur,12s) linear forwards;
+        animation:fall var(--dur,16s) linear forwards;
         will-change:transform,opacity;
       }
       .heart{
-        font-size:20px; line-height:1; color:var(--heart);
+        font-size:22px; line-height:1; color:var(--heart);
         filter:drop-shadow(0 6px 12px #00000028);
         animation:beat 1.8s ease-in-out infinite;
       }
       @keyframes beat{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
 
       .bubble{
-        max-width:min(62vw, 520px);
+        max-width:min(72vw, 560px);
         background:var(--bubble);
         border:1px solid var(--bubble-b);
-        padding:10px 14px; border-radius:14px;
+        padding:12px 16px; border-radius:14px;
         box-shadow:0 10px 22px rgba(0,0,0,.08);
-        font-size:14px; color:#383838;
-        white-space:nowrap;           /* biar satu baris panjang */
+        font-size:15px; color:#2b2b2b;
+        text-align:center;          /* tengah */
+        white-space:normal;         /* boleh balut baris */
+        line-height:1.35;
       }
       .bubble b{ color:var(--heart) }
 
-      /* Jatuh perlahan & hilang hampir bawah (98%) */
+      /* Jatuh lebih lama & sampai bawah benar */
       @keyframes fall{
-        0%   { transform:translate(var(--x,0), -100px); opacity:0 }
-        10%  { opacity:1 }
-        98%  { opacity:1 }
-        100% { transform:translate(var(--x,0), calc(100% + 120px)); opacity:0 }
+        0%   { transform:translate(var(--x,0), -120px); opacity:0 }
+        12%  { opacity:1 }
+        99%  { opacity:1 }  /* kekal nampak hampir hujung */
+        100% { transform:translate(var(--x,0), calc(100% + 180px)); opacity:0 }
       }
 
-      /* Kawalan */
       .controls{
         display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
         margin:12px 10px 6px;
@@ -101,17 +98,12 @@
       }
       .btn:active{ transform:translateY(1px) }
 
-      /* Hint */
       .hint{ text-align:center; font-size:12px; color:var(--muted); margin:6px 12px 4px }
-
-      /* Footer mini */
-      .footer{
-        text-align:center; font-size:11px; color:#7a7a7a; margin:8px 0 2px
-      }
+      .footer{ text-align:center; font-size:11px; color:#7a7a7a; margin:8px 0 2px }
 
       @media (max-width:520px){
         .card{border-radius:18px}
-        .bubble{font-size:13px}
+        .bubble{font-size:14px}
       }
     </style>
   </head>
@@ -139,27 +131,22 @@
       const stopBtn  = document.getElementById('stop');
       const oneBtn   = document.getElementById('dropOne');
 
-      /* ===== Tema warna ikut masa (Asia/Kuala_Lumpur) ===== */
+      /* ========== (Opsyenal) Tema ikut masa ========== */
       function applyTimeTheme(){
-        const h = new Date().getHours(); // waktu lokal device
-        // pagi 5–11, siang 11–16, senja 16–19, malam 19–5
+        const h = new Date().getHours();
         if (h >= 5 && h < 11) {
-          // pagi: pink lembut
           document.documentElement.style.setProperty('--heart',    '#ff72b3');
           document.documentElement.style.setProperty('--bubble',   '#ffffff');
           document.documentElement.style.setProperty('--bubble-b', '#00000012');
         } else if (h >= 11 && h < 16) {
-          // siang: pink terang
           document.documentElement.style.setProperty('--heart',    '#ff3f96');
           document.documentElement.style.setProperty('--bubble',   '#ffffff');
           document.documentElement.style.setProperty('--bubble-b', '#00000014');
         } else if (h >= 16 && h < 19) {
-          // senja: keunguan hangat
           document.documentElement.style.setProperty('--heart',    '#d754ff');
           document.documentElement.style.setProperty('--bubble',   '#fff7ff');
           document.documentElement.style.setProperty('--bubble-b', '#7b3ad720');
         } else {
-          // malam: fuchsia pekat + bubble kebiruan halus
           document.documentElement.style.setProperty('--heart',    '#ff2d86');
           document.documentElement.style.setProperty('--bubble',   '#f7f9ff');
           document.documentElement.style.setProperty('--bubble-b', '#00104018');
@@ -167,7 +154,7 @@
       }
       applyTimeTheme();
 
-      /* ===== Mesej manis ===== */
+      /* ========== Mesej ========== */
       const msgs = [
         "Fadhlin, your heart is kind — that matters most.",
         "It’s okay to rest. You’re not falling behind.",
@@ -187,15 +174,14 @@
       ];
       let i = 0, timer=null, raining=false;
 
-      /* ===== Bunyi “pling” (Web Audio — aktif selepas Start) ===== */
+      /* ========== Bunyi “pling” ========== */
       let audioCtx = null;
       function playPling(){
-        if(!audioCtx) return; // belum Start
+        if(!audioCtx) return;
         const ctx = audioCtx;
         const o = ctx.createOscillator();
         const g = ctx.createGain();
 
-        // nada lembut major triad (random pilih C5/E5/G5)
         const freqs = [523.25, 659.25, 783.99];
         o.frequency.value = freqs[Math.floor(Math.random()*freqs.length)];
 
@@ -203,27 +189,26 @@
         const now = ctx.currentTime;
         g.gain.setValueAtTime(0.0001, now);
         g.gain.linearRampToValueAtTime(0.12, now+0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, now+0.35 + Math.random()*0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, now+0.38 + Math.random()*0.12);
 
         o.connect(g); g.connect(ctx.destination);
         o.start(now);
-        o.stop(now+0.5);
+        o.stop(now+0.55);
       }
 
-      /* ===== Util ===== */
+      /* ========== Util ========== */
       function nextMsg(){ const m = msgs[i % msgs.length]; i++; return m; }
 
-      // Buat satu titisan — slow & jauh ke bawah
+      // Satu titisan — durasi 14–20s, pusatkan teks
       function makeDrop(xPx = null){
         const rect = sky.getBoundingClientRect();
         const x = xPx === null
-          ? (rect.left + 40 + Math.random()*(rect.width - 80))
+          ? (rect.left + rect.width/2 + (Math.random()*rect.width/2 - rect.width/4)) // bias dekat tengah
           : xPx;
 
         const d = document.createElement('div');
         d.className = 'drop';
-        // durasi lebih perlahan (10–14s)
-        d.style.setProperty('--dur', (10 + Math.random()*4) + 's');
+        d.style.setProperty('--dur', (14 + Math.random()*6) + 's');  // 14–20s
         d.style.setProperty('--x', `${x - rect.left}px`);
 
         const heart = document.createElement('div');
@@ -233,25 +218,23 @@
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
 
-        // Taip huruf satu-satu (perlahan)
+        // taip perlahan & centered
         const text = `♥ ${nextMsg()}`;
         let p = 0;
         const typer = setInterval(()=>{
           bubble.textContent = text.slice(0, p++);
           if(p > text.length) clearInterval(typer);
-        }, 28); // kelajuan menaip
+        }, 28);
 
         d.appendChild(heart);
         d.appendChild(bubble);
         sky.appendChild(d);
 
         playPling();
-
-        // auto remove selepas animasi tamat (turun sampai bawah)
         d.addEventListener('animationend', () => d.remove());
       }
 
-      /* ===== Hujan satu-satu & perlahan ===== */
+      /* ========== Hujan satu-satu & perlahan ========== */
       function startRain(){
         if(raining) return;
         raining = true;
@@ -259,17 +242,15 @@
         startBtn.disabled = true;
         stopBtn.disabled = false;
 
-        // Sediakan audio context lepas user gesture
         if(!audioCtx){
-          try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-          catch(e){ /* ignore */ }
+          try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
         }
 
-        // Loop: 1 titisan sahaja setiap 700–1100ms (still “one by one”)
+        // 1 titisan setiap 900–1300ms (masih satu-satu, lebih santai)
         const loop = () => {
           if(!raining) return;
           makeDrop();
-          timer = setTimeout(loop, 700 + Math.random()*400);
+          timer = setTimeout(loop, 900 + Math.random()*400);
         };
         loop();
       }
@@ -281,17 +262,13 @@
         clearTimeout(timer);
       }
 
-      // Satu titisan manual
       function dropOne(){ makeDrop(); }
 
-      // Tap di langit untuk jatuhkan di lokasi sentuhan
       sky.addEventListener('pointerdown', (e)=> makeDrop(e.clientX));
-
       startBtn.addEventListener('click', startRain);
       stopBtn .addEventListener('click', stopRain);
       oneBtn  .addEventListener('click', dropOne);
 
-      // Mesra mobile: fokus Start
       window.addEventListener('load', ()=> startBtn.focus(), {once:true});
     </script>
   </body>
