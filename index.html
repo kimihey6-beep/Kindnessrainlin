@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ms">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kindness Rain for Fadhlin</title>
+    <!-- Fonts lembut -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root{
+        --bg1:#fff7fb; --bg2:#ffe9f6;
+        --card:#ffffff; --text:#161617; --muted:#6a6a6a;
+        --pink:#ff4fa0; --pink-soft:#ff86bf;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0}
+      body{
+        font-family:Quicksand, system-ui, Segoe UI, Arial, sans-serif;
+        background:radial-gradient(80% 80% at 50% 20%, var(--bg2), var(--bg1));
+        color:var(--text); overflow:hidden;
+        -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      }
+
+      .wrap{position:fixed; inset:0; display:grid; place-items:center; padding:16px}
+      .card{
+        position:relative; width:min(900px, 94vw);
+        border-radius:22px; background:var(--card);
+        box-shadow:0 18px 44px rgba(0,0,0,.12);
+        padding:22px 14px 18px; overflow:hidden;
+      }
+
+      /* Tajuk */
+      .title{
+        font-family:"Dancing Script", cursive; font-weight:700;
+        font-size:clamp(26px,6.2vw,54px); line-height:1.1;
+        color:var(--pink); text-align:center; margin:2px 8px 2px;
+        text-shadow:0 0 18px rgba(255,79,160,.22);
+        animation:fadeDown .7s ease-out both;
+      }
+      .sub{ text-align:center; font-weight:700; color:var(--pink-soft); margin:4px 0 10px }
+      @keyframes fadeDown{ from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)} }
+
+      /* Kawasan hujan */
+      .sky{
+        position:relative; height:min(62vh, 560px);
+        border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
+        overflow:hidden; margin:0 10px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
+      }
+
+      /* Titisan hati */
+      .drop{
+        position:absolute; top:-60px;
+        display:flex; align-items:center; gap:10px;
+        transform:translateX(-50%);
+        animation:fall var(--dur,8s) linear forwards;
+        will-change:transform;
+      }
+      .heart{
+        font-size:18px; line-height:1; color:var(--pink);
+        filter:drop-shadow(0 6px 12px rgba(255,79,160,.28));
+        animation:beat 1.8s ease-in-out infinite;
+      }
+      @keyframes beat{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+      .bubble{
+        max-width:min(62vw, 520px);
+        background:rgba(255,255,255,.92);
+        border:1px solid rgba(0,0,0,.06);
+        padding:10px 14px; border-radius:14px;
+        box-shadow:0 10px 22px rgba(0,0,0,.08);
+        font-size:14px; color:#383838;
+      }
+      .bubble b{ color:var(--pink) }
+
+      @keyframes fall{
+        0%   { transform:translate(var(--x,0), -80px); opacity:0 }
+        8%   { opacity:1 }
+        92%  { opacity:1 }
+        100% { transform:translate(var(--x,0), calc(100% + 80px)); opacity:0 }
+      }
+
+      /* Kawalan */
+      .controls{
+        display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+        margin:12px 10px 6px;
+      }
+      .btn{
+        background:linear-gradient(180deg, #ff8ec4, #ff5ea8);
+        color:#fff; border:none; border-radius:999px; padding:10px 16px;
+        font-weight:700; cursor:pointer; box-shadow:0 10px 20px rgba(255,94,168,.25);
+      }
+      .btn.secondary{
+        background:#fff; color:#ff5ea8; border:2px solid #ff5ea8;
+      }
+      .btn:active{ transform:translateY(1px) }
+
+      /* Hint */
+      .hint{ text-align:center; font-size:12px; color:var(--muted); margin:6px 12px 4px }
+
+      /* Footer mini */
+      .footer{
+        text-align:center; font-size:11px; color:#7a7a7a; margin:8px 0 2px
+      }
+
+      @media (max-width:520px){
+        .card{border-radius:18px}
+        .bubble{font-size:13px}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1 class="title">Kindness Rain for Fadhlin</h1>
+        <p class="sub">Be happy</p>
+
+        <div class="sky" id="sky" aria-label="Hujan kebaikan">
+          <!-- titisan akan dijana melalui JS -->
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="start">Start Rain</button>
+          <button class="btn secondary" id="stop" disabled>Stop</button>
+          <button class="btn secondary" id="dropOne">Drop 1</button>
+        </div>
+        <p class="hint">Petik butang <b>Start Rain</b> untuk hujan mesej manis; atau tekan <b>Drop 1</b> untuk satu titisan. Sentuh di mana-mana ruang untuk turunkan titisan di situ.</p>
+        <div class="footer">for Fadhlin — “Some days are heavy; let the kindness do the lifting.”</div>
+      </div>
+    </div>
+
+    <script>
+      const sky = document.getElementById('sky');
+      const startBtn = document.getElementById('start');
+      const stopBtn = document.getElementById('stop');
+      const oneBtn = document.getElementById('dropOne');
+
+      // Mesej manis (ringkas & lembut). Letakkan nama Fadhlin sekali-sekala.
+      const msgs = [
+        "Fadhlin, your heart is kind — that matters most.",
+        "It’s okay to rest. You’re not falling behind.",
+        "Small wins count. Today’s enough.",
+        "Your smile changes rooms. 😊",
+        "You’ve survived every tough day so far.",
+        "Progress over perfection. Proud of you.",
+        "Be gentle with yourself today.",
+        "Storms pass. You won’t feel like this forever.",
+        "You are loved more than you know.",
+        "Tiny steps are still steps.",
+        "Breathe. In… out… you’re safe here.",
+        "You bring warmth to someone’s world.",
+        "Fadhlin, you’re allowed to feel and still be strong.",
+        "Let today be soft. You deserve it.",
+        "One kind thought can brighten the whole day."
+      ];
+      let i = 0, timer=null, raining=false;
+
+      // Util: pick message
+      function nextMsg(){
+        const msg = msgs[i % msgs.length];
+        i++;
+        return msg;
+      }
+
+      // Buat satu titisan di posisi X rawak (atau ikut sentuhan)
+      function makeDrop(xPx = null){
+        const rect = sky.getBoundingClientRect();
+        const x = xPx === null
+          ? (rect.left + 40 + Math.random()*(rect.width - 80))
+          : xPx;
+
+        const d = document.createElement('div');
+        d.className = 'drop';
+        d.style.setProperty('--x', `${x - rect.left}px`);
+        d.style.setProperty('--dur', (7 + Math.random()*4) + 's');
+
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = '❤';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = `<b>♥</b> ${nextMsg()}`;
+
+        d.appendChild(heart);
+        d.appendChild(bubble);
+        sky.appendChild(d);
+
+        // auto remove selepas animasi
+        d.addEventListener('animationend', () => d.remove());
+      }
+
+      // Auto hujan
+      function startRain(){
+        if(raining) return;
+        raining = true;
+        startBtn.textContent = 'Raining…';
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+
+        // spawn loop
+        const loop = () => {
+          if(!raining) return;
+          // 1–2 titisan setiap 300–650ms
+          const n = Math.random() < 0.6 ? 1 : 2;
+          for(let k=0;k<n;k++) makeDrop();
+          timer = setTimeout(loop, 300 + Math.random()*350);
+        };
+        loop();
+      }
+      function stopRain(){
+        raining = false;
+        startBtn.textContent = 'Start Rain';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        clearTimeout(timer);
+      }
+
+      // Satu titisan
+      function dropOne(){ makeDrop(); }
+
+      // Tap di langit untuk jatuhkan di lokasi sentuhan
+      sky.addEventListener('pointerdown', (e)=>{
+        const x = e.clientX;
+        makeDrop(x);
+      });
+
+      startBtn.addEventListener('click', startRain);
+      stopBtn.addEventListener('click', stopRain);
+      oneBtn.addEventListener('click', dropOne);
+
+      // Mesra mobile: fokus Start supaya mudah tekan
+      window.addEventListener('load', ()=> startBtn.focus(), {once:true});
+    </script>
+  </body>
+</html>
